@@ -1,9 +1,8 @@
 """
 news_rewriter.py — Rewrites raw financial news in beginner-friendly English.
 
-Takes raw news stories from the fetcher and uses OpenAI to rewrite each one
-in plain English, defining every financial term on first use. Produces both
-a front-page summary (150-250 words) and a deep-dive explanation (400-600 words).
+Takes raw news stories from the fetcher and uses OpenAI gpt-4o-mini in a single
+batched call to rank and rewrite all stories, saving over 90% in token costs.
 """
 
 import json
@@ -12,13 +11,10 @@ from openai import OpenAI
 
 def rewrite_stories(raw_stories: list[dict]) -> list[dict]:
     """
-    Rewrite raw news stories in beginner-friendly English.
+    Rewrite raw news stories in beginner-friendly English in a single batch call.
     
-    For each story, generates:
-    - A front-page summary (150-250 words) for the newspaper layout
-    - A deep-dive explanation (400-600 words) for the HTML expandable section
-    
-    Also ranks stories by importance (1 = most important).
+    Uses gpt-4o-mini (highly cost-effective) to rank and rewrite all 7 stories
+    at once, which reduces prompt token overhead and saves API cost.
     
     Args:
         raw_stories: List of raw story dicts from news_fetcher.fetch_news()
@@ -35,183 +31,93 @@ def rewrite_stories(raw_stories: list[dict]) -> list[dict]:
     """
     client = OpenAI()
     
-    # First, rank the stories by importance
-    ranking_prompt = f"""You are a news editor. Below are {len(raw_stories)} financial news stories 
-from today. Rank them from 1 (most important to ordinary people) to {len(raw_stories)} (least important).
+    # Prepare batch prompt
+    stories_input = []
+    for i, s in enumerate(raw_stories):
+        stories_input.append({
+            "index": i,
+            "headline": s["headline"],
+            "category": s["category"],
+            "source_name": s["source_name"],
+            "source_url": s["source_url"],
+            "content": s["raw_summary"]
+        })
+        
+    prompt = f"""You are a financial journalist and editor writing a personal finance newspaper for beginners.
+Your goal is to explain the day's financial news to someone with ZERO finance background.
 
-Consider: How many people does this affect? Does it impact everyday prices, jobs, 
-or savings? Is it historically significant?
+Task:
+1. Rank these {len(raw_stories)} stories by importance to ordinary people (1 = most important to their daily lives/wallet, 7 = least important).
+2. Rewrite each story's headline, summary, and deep dive according to the rules below.
 
-Stories:
-{json.dumps([{"headline": s["headline"], "category": s["category"], "summary": s["raw_summary"][:200]} for s in raw_stories], indent=2)}
+Stories to process:
+{json.dumps(stories_input, indent=2)}
 
-Return a JSON array of objects with "headline" and "rank" (integer 1-{len(raw_stories)}).
-Return ONLY the JSON array."""
+Rules for Rewriting:
+1. Plain English: Assume the reader knows absolutely nothing about finance. Define EVERY financial term the first time it is used in each story.
+   Examples of definitions:
+   - "the Fed" -> "the Federal Reserve (the U.S. central bank that controls interest rates)"
+   - "S&P 500" -> "the S&P 500 (an index that tracks the stock prices of 500 large U.S. companies)"
+   - "bond yields" -> "bond yields (the return investors earn from lending money to the government)"
+   - "basis points" -> "basis points (a unit of measurement in finance, where 100 basis points equals 1 percentage point)"
+   - "inflation" -> "inflation (the general rise in prices of goods and services over time)"
+2. Summaries: Generate a 150-250 word explanation in HTML paragraphs (<p> tags). Cover the key facts: what happened, why it happened, and what it means for regular people.
+3. Deep Dives: Generate a 400-600 word deep-dive in HTML paragraphs (<p> tags). Provide more background, cause-and-effect, what experts are saying, and what happens next.
+4. Explainer of the Day (story with category "explainer"): This is a concept definition rather than standard news. Rewrite it to explain what the concept is, why it's in the news today, and how it affects everyday life.
 
-    ranking_response = client.responses.create(
-        model="gpt-4.1",
-        input=[{"role": "user", "content": ranking_prompt}],
-        temperature=0.2,
-    )
-    
-    ranking_text = ""
-    for item in ranking_response.output:
-        if item.type == "message":
-            for block in item.content:
-                if block.type == "output_text":
-                    ranking_text = block.text
-                    break
-    
-    # Parse ranking
-    ranking_text = ranking_text.strip()
-    if ranking_text.startswith("```"):
-        lines = ranking_text.split("\n")
-        lines = [l for l in lines if not l.strip().startswith("```")]
-        ranking_text = "\n".join(lines)
-    
-    try:
-        rankings = json.loads(ranking_text)
-        rank_map = {r["headline"]: r["rank"] for r in rankings}
-    except (json.JSONDecodeError, KeyError):
-        # Fallback: assign ranks by order
-        rank_map = {s["headline"]: i + 1 for i, s in enumerate(raw_stories)}
-    
-    # Now rewrite each story
-    rewritten_stories = []
-    
-    for story in raw_stories:
-        rank = rank_map.get(story["headline"], len(raw_stories))
-        rewritten = _rewrite_single_story(client, story, rank)
-        rewritten_stories.append(rewritten)
-    
-    # Sort by importance rank
-    rewritten_stories.sort(key=lambda s: s["importance_rank"])
-    
-    return rewritten_stories
-
-
-def _rewrite_single_story(client: OpenAI, story: dict, rank: int) -> dict:
-    """Rewrite a single story in beginner-friendly English."""
-    
-    is_explainer = story["category"] == "explainer"
-    
-    if is_explainer:
-        rewrite_prompt = f"""You are a financial journalist writing for people with ZERO finance background.
-
-Rewrite the following finance explainer in plain, beginner-friendly English.
-This is an "Explainer of the Day" feature — a concept currently in the news.
-
-ORIGINAL:
-Headline: {story["headline"]}
-Content: {story["raw_summary"]}
-Source: {story["source_name"]}
-
-RULES:
-- Define EVERY financial term the first time you use it
-  Example: "the S&P 500 (an index that tracks the stock prices of the 500 largest 
-  U.S. companies — think of it as a scoreboard for the overall stock market)"
-- Use analogies and everyday comparisons
-- Explain WHY this concept matters to ordinary people
-- Explain what's happening RIGHT NOW with this concept in the news
-
-OUTPUT FORMAT (return as JSON):
+Output Format:
+Return a JSON object with a single "stories" key containing the array of processed stories.
+Format:
 {{
-  "headline": "A clear, engaging headline (keep it simple but informative)",
-  "summary": "A 150-250 word explanation in HTML paragraphs (<p> tags). Define the concept clearly, explain why it's in the news today, and why it matters to regular people.",
-  "deep_dive": "A 400-600 word deep-dive in HTML paragraphs (<p> tags). Go deeper: history of the concept, real-world examples, what could happen next, how it affects savings/jobs/prices. Still in plain English with all terms defined."
+  "stories": [
+    {{
+      "headline": "Clear, engaging, jargon-free headline",
+      "summary": "<p>Summary paragraph 1...</p><p>Summary paragraph 2...</p>",
+      "deep_dive": "<p>Deep dive paragraph 1...</p><p>Deep dive paragraph 2...</p><p>...</p>",
+      "category": "markets | economy | companies | explainer",
+      "source_url": "...",
+      "source_name": "...",
+      "importance_rank": 1
+    }}
+  ]
 }}
 
-Return ONLY the JSON object."""
-    else:
-        rewrite_prompt = f"""You are a financial journalist writing for people with ZERO finance background.
+Return ONLY the raw JSON object, no markdown styling or code fences."""
 
-Rewrite the following financial news story in plain, beginner-friendly English.
-Don't shorten or dumb it down — keep all the important details, just explain 
-everything as if the reader has never heard of these concepts before.
-
-ORIGINAL:
-Headline: {story["headline"]}
-Content: {story["raw_summary"]}
-Source: {story["source_name"]}
-Category: {story["category"]}
-
-RULES:
-- Define EVERY financial term the first time you use it. Examples:
-  • "the Fed" → "the Federal Reserve (the U.S. central bank that controls interest rates)"
-  • "basis points" → "basis points (a unit used in finance — 100 basis points = 1 percentage point)"
-  • "the Dow" → "the Dow Jones Industrial Average (an index tracking 30 major U.S. companies)"
-  • "bond yields" → "bond yields (the return investors earn from lending money to the government)"
-- Use short sentences and active voice
-- Explain cause and effect: "This happened BECAUSE... This means FOR YOU..."
-- Include specific numbers, dates, and names from the original
-- Don't use jargon without explaining it
-
-OUTPUT FORMAT (return as JSON):
-{{
-  "headline": "A clear, factual headline rewritten for a general audience",
-  "summary": "A 150-250 word summary in HTML paragraphs (<p> tags). Cover the key facts and explain what happened and why it matters. Define all terms on first use.",
-  "deep_dive": "A 400-600 word deep-dive in HTML paragraphs (<p> tags). Add more context: what led to this, who's affected, what experts are saying, what could happen next, and what it means for ordinary people's wallets. Still define all terms."
-}}
-
-Return ONLY the JSON object."""
-
-    response = client.responses.create(
-        model="gpt-4.1",
-        input=[{"role": "user", "content": rewrite_prompt}],
-        temperature=0.4,
+    # Using gpt-4o-mini which is extremely cheap ($0.15/1M input, $0.60/1M output tokens)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are a precise JSON assistant. Return only valid raw JSON matching the requested structure."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.3,
+        response_format={"type": "json_object"}
     )
     
-    raw_text = ""
-    for item in response.output:
-        if item.type == "message":
-            for block in item.content:
-                if block.type == "output_text":
-                    raw_text = block.text
-                    break
-    
-    # Parse JSON
-    json_text = raw_text.strip()
-    if json_text.startswith("```"):
-        lines = json_text.split("\n")
-        lines = [l for l in lines if not l.strip().startswith("```")]
-        json_text = "\n".join(lines)
+    raw_text = response.choices[0].message.content.strip()
     
     try:
-        rewritten = json.loads(json_text)
+        data = json.loads(raw_text)
+        rewritten = data.get("stories", [])
     except json.JSONDecodeError:
-        start = json_text.find("{")
-        end = json_text.rfind("}") + 1
-        if start != -1 and end > start:
-            rewritten = json.loads(json_text[start:end])
-        else:
-            # Fallback: use raw content
-            rewritten = {
-                "headline": story["headline"],
-                "summary": f"<p>{story['raw_summary']}</p>",
-                "deep_dive": f"<p>{story['raw_summary']}</p>",
-            }
-    
-    return {
-        "headline": rewritten.get("headline", story["headline"]),
-        "summary": rewritten.get("summary", ""),
-        "deep_dive": rewritten.get("deep_dive", ""),
-        "category": story["category"],
-        "source_url": story["source_url"],
-        "source_name": story["source_name"],
-        "importance_rank": rank,
-    }
-
-
-if __name__ == "__main__":
-    # Quick test with sample data
-    sample = [{
-        "headline": "Federal Reserve Holds Interest Rates Steady at 5.25-5.50%",
-        "raw_summary": "The Federal Reserve kept its benchmark interest rate unchanged at 5.25-5.50% on Wednesday, as expected. Fed Chair Jerome Powell signaled that rate cuts could begin in September if inflation continues to cool. The central bank noted that the labor market has come into better balance and that inflation has made further progress toward the 2% target.",
-        "source_url": "https://reuters.com/example",
-        "source_name": "Reuters",
-        "category": "economy",
-    }]
-    
-    print("Rewriting sample story...")
-    result = rewrite_stories(sample)
-    print(json.dumps(result, indent=2))
+        # Fallback in case of parse error: preserve original structure
+        print("⚠️ Warning: Failed to parse batch JSON. Using raw fallback.")
+        rewritten = []
+        for i, s in enumerate(raw_stories):
+            rewritten.append({
+                "headline": s["headline"],
+                "summary": f"<p>{s['raw_summary']}</p>",
+                "deep_dive": f"<p>{s['raw_summary']}</p>",
+                "category": s["category"],
+                "source_url": s["source_url"],
+                "source_name": s["source_name"],
+                "importance_rank": i + 1
+            })
+            
+    # If LLM returned fewer stories or failed to rank correctly, align ranks
+    rewritten.sort(key=lambda s: s.get("importance_rank", 99))
+    for i, s in enumerate(rewritten, 1):
+        s["importance_rank"] = i
+        
+    return rewritten
