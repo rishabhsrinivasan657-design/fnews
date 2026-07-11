@@ -38,7 +38,7 @@
     /* --- Page Setup ------------------------------------------------------ */
     @page {
       size: letter;
-      margin: 1.5cm 2cm;
+      margin: 1cm 1.2cm;
 
       @bottom-center {
         content: "Page " counter(page) " of " counter(pages);
@@ -74,8 +74,8 @@
     /* --- Base ------------------------------------------------------------ */
     body {
       font-family: var(--font-body);
-      font-size: 10.5pt;
-      line-height: 1.55;
+      font-size: 9.5pt;
+      line-height: 1.4;
       color: var(--color-text);
       background: var(--color-bg);
     }
@@ -223,8 +223,8 @@
        ==================================================================== */
     .pdf-section {
       margin-bottom: 16px;
-      break-before: auto;
-      break-inside: auto;
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
 
     .pdf-section:last-of-type {
@@ -238,6 +238,8 @@
       gap: 10px;
       margin-bottom: 12px;
       margin-top: 4px;
+      break-after: avoid;
+      page-break-after: avoid;
     }
 
     .section-header::before,
@@ -259,13 +261,9 @@
 
     /* Section body: multi-column */
     .section-stories {
-      column-count: 3;
-      column-gap: 22px;
-      column-rule: 1px solid var(--color-rule);
-    }
-
-    .section-stories--two-col {
       column-count: 2;
+      column-gap: 18px;
+      column-rule: 1px solid var(--color-rule);
     }
 
     /* ====================================================================
@@ -425,7 +423,6 @@
     <h1 class="lead-story__headline">{{ lead_story.headline }}</h1>
     <div class="lead-story__body">
       {{ lead_story.summary }}
-      {{ lead_story.deep_dive }}
     </div>
     <div class="lead-story__source">
       Source: <a href="{{ lead_story.source_url }}">{{ lead_story.source_name }}</a>
@@ -440,7 +437,7 @@
     <div class="section-header">
       <span class="section-header__title">Markets</span>
     </div>
-    <div class="section-stories{% if sections.markets | length < 2 %} section-stories--two-col{% endif %}">
+    <div class="section-stories">
       {% for story in sections.markets %}
       <article class="story">
         <h2 class="story__headline">{{ story.headline }}</h2>
@@ -464,7 +461,7 @@
     <div class="section-header">
       <span class="section-header__title">Economy</span>
     </div>
-    <div class="section-stories{% if sections.economy | length < 2 %} section-stories--two-col{% endif %}">
+    <div class="section-stories">
       {% for story in sections.economy %}
       <article class="story">
         <h2 class="story__headline">{{ story.headline }}</h2>
@@ -488,7 +485,7 @@
     <div class="section-header">
       <span class="section-header__title">Companies</span>
     </div>
-    <div class="section-stories{% if sections.companies | length < 2 %} section-stories--two-col{% endif %}">
+    <div class="section-stories">
       {% for story in sections.companies %}
       <article class="story">
         <h2 class="story__headline">{{ story.headline }}</h2>

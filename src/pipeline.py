@@ -23,8 +23,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from dotenv import load_dotenv
 
-# Load .env file if it exists
-load_dotenv(PROJECT_ROOT / ".env")
+# Load .env file with override=True to prioritize local values
+load_dotenv(PROJECT_ROOT / ".env", override=True)
 
 from src.news_fetcher import fetch_news
 from src.news_rewriter import rewrite_stories

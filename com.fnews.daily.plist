@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.fnews.daily</string>
+    
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/rishabhsrinivasan/Desktop/Projects/fnews/run.sh</string>
+    </array>
+    
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>7</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    
+    <key>StandardOutPath</key>
+    <string>/Users/rishabhsrinivasan/Desktop/Projects/fnews/output/launchd_stdout.log</string>
+    
+    <key>StandardErrorPath</key>
+    <string>/Users/rishabhsrinivasan/Desktop/Projects/fnews/output/launchd_stderr.log</string>
+    
+    <key>WorkingDirectory</key>
+    <string>/Users/rishabhsrinivasan/Desktop/Projects/fnews</string>
+</dict>
+</plist>
