@@ -1,0 +1,627 @@
+/* ==========================================================================
+   THE DAILY FINANCE BRIEF — Design System
+   A Wall Street Journal–inspired newspaper stylesheet
+   ========================================================================== */
+
+/* --- Google Fonts -------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+
+/* --- Custom Properties --------------------------------------------------- */
+:root {
+  /* Palette */
+  --color-bg:          #faf8f0;
+  --color-bg-alt:      #f3f0e4;
+  --color-text:        #1a1a1a;
+  --color-text-muted:  #4a4a4a;
+  --color-rule:        #d4d0c8;
+  --color-rule-dark:   #b8b4aa;
+  --color-section:     #8b8378;
+  --color-accent:      #c41e3a;
+  --color-link:        #1a1a1a;
+  --color-link-hover:  #c41e3a;
+  --color-explainer:   #f7f5eb;
+
+  /* Typography */
+  --font-display:      'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body:         'Lora', Georgia, 'Times New Roman', serif;
+  --font-ui:           'Lora', Georgia, serif;
+
+  /* Sizes */
+  --size-masthead:     48px;
+  --size-lead-hl:      36px;
+  --size-headline:     24px;
+  --size-sub-headline: 18px;
+  --size-section-hdr:  13px;
+  --size-body:         15px;
+  --size-small:        12px;
+  --size-byline:       12px;
+
+  /* Spacing */
+  --gap-column:        28px;
+  --gap-section:       24px;
+  --page-max-width:    1140px;
+  --page-padding:      24px;
+
+  /* Rules */
+  --rule-thin:         1px solid var(--color-rule);
+  --rule-medium:       2px solid var(--color-rule-dark);
+  --rule-accent:       3px solid var(--color-text);
+}
+
+/* --- Reset & Base -------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--size-body);
+  line-height: 1.65;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+a {
+  color: var(--color-link);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-link-hover);
+  border-bottom-color: var(--color-link-hover);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* --- Page Container ------------------------------------------------------ */
+.newspaper {
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  padding: var(--page-padding);
+}
+
+/* ==========================================================================
+   MASTHEAD
+   ========================================================================== */
+.masthead {
+  text-align: center;
+  padding: 20px 0 16px;
+  border-top: var(--rule-accent);
+  border-bottom: var(--rule-accent);
+  margin-bottom: 0;
+  position: relative;
+}
+
+/* Thin inner rule just inside the thick top border */
+.masthead::after {
+  content: '';
+  display: block;
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  border-bottom: var(--rule-thin);
+}
+
+.masthead__name {
+  font-family: var(--font-display);
+  font-size: var(--size-masthead);
+  font-weight: 900;
+  letter-spacing: 2px;
+  line-height: 1.1;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.masthead__tagline {
+  font-family: var(--font-body);
+  font-size: var(--size-small);
+  font-style: italic;
+  color: var(--color-section);
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.masthead__dateline {
+  font-family: var(--font-body);
+  font-size: var(--size-small);
+  color: var(--color-section);
+  letter-spacing: 0.3px;
+}
+
+.masthead__edition {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--color-section);
+  margin-top: 2px;
+}
+
+.masthead__personalised {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-style: italic;
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-top: 2px;
+}
+
+/* Double rule below masthead */
+.masthead-rule {
+  border: none;
+  border-top: 2px solid var(--color-text);
+  border-bottom: 1px solid var(--color-text);
+  height: 5px;
+  margin: 0 0 var(--gap-section) 0;
+}
+
+/* ==========================================================================
+   LEAD STORY (full-width hero)
+   ========================================================================== */
+.lead-story {
+  padding: var(--gap-section) 0;
+  border-bottom: var(--rule-medium);
+  margin-bottom: var(--gap-section);
+}
+
+.lead-story__category {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--color-accent);
+  margin-bottom: 10px;
+}
+
+.lead-story__headline {
+  font-family: var(--font-display);
+  font-size: var(--size-lead-hl);
+  font-weight: 900;
+  line-height: 1.15;
+  color: var(--color-text);
+  margin-bottom: 16px;
+  max-width: 85%;
+}
+
+.lead-story__body {
+  column-count: 2;
+  column-gap: var(--gap-column);
+  column-rule: var(--rule-thin);
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+}
+
+.lead-story__body p {
+  margin-bottom: 0.9em;
+  orphans: 2;
+  widows: 2;
+}
+
+.lead-story__body p:first-child::first-letter {
+  font-family: var(--font-display);
+  font-size: 3.2em;
+  float: left;
+  line-height: 0.8;
+  padding-right: 8px;
+  padding-top: 4px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.lead-story__source {
+  margin-top: 14px;
+  font-family: var(--font-body);
+  font-size: var(--size-byline);
+  color: var(--color-section);
+  font-style: italic;
+}
+
+.lead-story__source a {
+  color: var(--color-section);
+  border-bottom: 1px dotted var(--color-rule);
+}
+
+.lead-story__source a:hover {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+/* ==========================================================================
+   SECTION GRID
+   ========================================================================== */
+.section-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0 var(--gap-column);
+  position: relative;
+}
+
+/* Vertical column rules via pseudo-elements on grid children */
+.section-grid > .section-column {
+  position: relative;
+}
+
+.section-grid > .section-column:not(:last-child) {
+  border-right: var(--rule-thin);
+  padding-right: var(--gap-column);
+}
+
+/* --- Section Header ------------------------------------------------------ */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  margin-top: 8px;
+}
+
+.section-header::before,
+.section-header::after {
+  content: '';
+  flex: 1;
+  border-top: var(--rule-thin);
+}
+
+.section-header__title {
+  font-family: var(--font-body);
+  font-size: var(--size-section-hdr);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: var(--color-section);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   STORY CARDS
+   ========================================================================== */
+.story {
+  margin-bottom: var(--gap-section);
+  padding-bottom: var(--gap-section);
+  border-bottom: var(--rule-thin);
+}
+
+.story:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.story__headline {
+  font-family: var(--font-display);
+  font-size: var(--size-headline);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-text);
+  margin-bottom: 10px;
+}
+
+.story__summary {
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+}
+
+.story__summary p {
+  margin-bottom: 0.75em;
+}
+
+.story__summary p:last-child {
+  margin-bottom: 0;
+}
+
+.story__deep-dive {
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--color-rule);
+}
+
+.story__deep-dive p {
+  margin-bottom: 0.75em;
+}
+
+.story__deep-dive p:last-child {
+  margin-bottom: 0;
+}
+
+.story__source {
+  margin-top: 10px;
+  font-family: var(--font-body);
+  font-size: var(--size-byline);
+  color: var(--color-section);
+  font-style: italic;
+}
+
+.story__source a {
+  color: var(--color-section);
+  border-bottom: 1px dotted var(--color-rule);
+}
+
+.story__source a:hover {
+  color: var(--color-accent);
+}
+
+/* ==========================================================================
+   DETAILS / SUMMARY (expand-collapse)
+   ========================================================================== */
+.story details {
+  margin-top: 4px;
+}
+
+.story details summary {
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-body);
+  font-size: var(--size-small);
+  color: var(--color-section);
+  letter-spacing: 0.3px;
+  padding: 6px 0;
+  transition: color 0.2s ease;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.story details summary::-webkit-details-marker {
+  display: none;
+}
+
+.story details summary::before {
+  content: '▸';
+  display: inline-block;
+  font-size: 10px;
+  transition: transform 0.25s ease;
+  color: var(--color-section);
+}
+
+.story details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.story details summary:hover {
+  color: var(--color-accent);
+}
+
+.story details summary:hover::before {
+  color: var(--color-accent);
+}
+
+/* Smooth expand animation */
+.story details .story__deep-dive {
+  overflow: hidden;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    max-height: 2000px;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   EXPLAINER BOX (special sidebar treatment)
+   ========================================================================== */
+.explainer-box {
+  background-color: var(--color-explainer);
+  border: 1px solid var(--color-rule);
+  border-top: 3px solid var(--color-section);
+  padding: 20px;
+  margin-top: 8px;
+}
+
+.explainer-box .section-header {
+  margin-top: 0;
+}
+
+.explainer-box .section-header::before,
+.explainer-box .section-header::after {
+  border-top-color: var(--color-rule-dark);
+}
+
+.explainer-box .story {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.explainer-box .story__headline {
+  font-size: 20px;
+}
+
+.explainer-label {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--color-accent);
+  margin-bottom: 4px;
+}
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+.newspaper-footer {
+  margin-top: var(--gap-section);
+  padding: 16px 0 24px;
+  border-top: var(--rule-accent);
+  text-align: center;
+}
+
+.newspaper-footer::before {
+  content: '';
+  display: block;
+  border-top: var(--rule-thin);
+  margin-bottom: 16px;
+  margin-top: 3px;
+}
+
+.footer__edition {
+  font-family: var(--font-body);
+  font-size: var(--size-small);
+  color: var(--color-section);
+  margin-bottom: 4px;
+}
+
+.footer__disclaimer {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--color-section);
+  font-style: italic;
+}
+
+.footer__date {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--color-rule-dark);
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   RESPONSIVE BREAKPOINTS
+   ========================================================================== */
+
+/* Tablet: 2 columns, explainer goes full-width below */
+@media (max-width: 900px) {
+  :root {
+    --size-masthead:  38px;
+    --size-lead-hl:   30px;
+    --gap-column:     22px;
+  }
+
+  .section-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Explainer column spans full width on tablet */
+  .section-column--explainer {
+    grid-column: 1 / -1;
+    border-right: none !important;
+    padding-right: 0 !important;
+    border-top: var(--rule-thin);
+    padding-top: var(--gap-section);
+    margin-top: 8px;
+  }
+
+  .lead-story__headline {
+    max-width: 100%;
+  }
+}
+
+/* Mobile: single column */
+@media (max-width: 600px) {
+  :root {
+    --size-masthead:  30px;
+    --size-lead-hl:   26px;
+    --size-headline:  21px;
+    --gap-column:     16px;
+    --page-padding:   16px;
+  }
+
+  .section-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-grid > .section-column:not(:last-child) {
+    border-right: none;
+    padding-right: 0;
+    border-bottom: var(--rule-thin);
+    padding-bottom: var(--gap-section);
+    margin-bottom: var(--gap-section);
+  }
+
+  .lead-story__body {
+    column-count: 1;
+  }
+
+  .lead-story__headline {
+    max-width: 100%;
+  }
+
+  .lead-story__body p:first-child::first-letter {
+    font-size: 2.6em;
+  }
+
+  /* Mobile reading usability enhancements */
+  .story details summary {
+    padding: 10px 14px;
+    background-color: var(--color-bg-alt);
+    border: 1px solid var(--color-rule);
+    border-radius: 3px;
+    display: inline-flex;
+    margin-top: 10px;
+    font-weight: 500;
+  }
+
+  .story details[open] summary {
+    margin-bottom: 12px;
+  }
+}
+
+/* ==========================================================================
+   PRINT STYLES
+   ========================================================================== */
+@media print {
+  body {
+    background: #fff;
+    font-size: 11pt;
+  }
+
+  .newspaper {
+    max-width: none;
+    padding: 0;
+  }
+
+  a {
+    color: var(--color-text) !important;
+    border-bottom: none !important;
+  }
+
+  .story details {
+    /* Force open all details for print */
+  }
+
+  .story details[open] .story__deep-dive {
+    animation: none;
+  }
+
+  .newspaper-footer {
+    page-break-inside: avoid;
+  }
+
+  .lead-story,
+  .story {
+    page-break-inside: avoid;
+  }
+}
