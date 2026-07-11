@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ newspaper_name }} — {{ date }}</title>
+  <style>
+    /* ====================================================================
+       THE DAILY FINANCE BRIEF — PDF Stylesheet (WeasyPrint)
+       Self-contained: all styles inline, local @font-face declarations
+       ==================================================================== */
+
+    /* --- Font Faces (local files) --------------------------------------- */
+    @font-face {
+      font-family: 'Playfair Display';
+      src: url('fonts/PlayfairDisplay-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      src: url('fonts/PlayfairDisplay-Bold.ttf') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Lora';
+      src: url('fonts/Lora-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Lora';
+      src: url('fonts/Lora-Italic.ttf') format('truetype');
+      font-weight: 400;
+      font-style: italic;
+    }
+
+    /* --- Page Setup ------------------------------------------------------ */
+    @page {
+      size: letter;
+      margin: 1.5cm 2cm;
+
+      @bottom-center {
+        content: "Page " counter(page) " of " counter(pages);
+        font-family: 'Lora', Georgia, serif;
+        font-size: 10px;
+        color: #8b8378;
+      }
+    }
+
+    /* --- Custom Properties ------------------------------------------------ */
+    :root {
+      --color-bg:          #faf8f0;
+      --color-bg-alt:      #f3f0e4;
+      --color-text:        #1a1a1a;
+      --color-text-muted:  #4a4a4a;
+      --color-rule:        #d4d0c8;
+      --color-rule-dark:   #b8b4aa;
+      --color-section:     #8b8378;
+      --color-accent:      #c41e3a;
+      --color-explainer:   #f5f3e8;
+
+      --font-display:      'Playfair Display', Georgia, 'Times New Roman', serif;
+      --font-body:         'Lora', Georgia, 'Times New Roman', serif;
+    }
+
+    /* --- Reset ----------------------------------------------------------- */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* --- Base ------------------------------------------------------------ */
+    body {
+      font-family: var(--font-body);
+      font-size: 10.5pt;
+      line-height: 1.55;
+      color: var(--color-text);
+      background: var(--color-bg);
+    }
+
+    a {
+      color: var(--color-text);
+      text-decoration: none;
+    }
+
+    /* ====================================================================
+       MASTHEAD
+       ==================================================================== */
+    .masthead {
+      text-align: center;
+      padding: 14px 0 12px;
+      border-top: 3px solid var(--color-text);
+      border-bottom: 3px solid var(--color-text);
+      margin-bottom: 0;
+      position: relative;
+    }
+
+    .masthead::after {
+      content: '';
+      display: block;
+      position: absolute;
+      bottom: 4px;
+      left: 0;
+      right: 0;
+      border-bottom: 1px solid var(--color-rule);
+    }
+
+    .masthead__name {
+      font-family: var(--font-display);
+      font-size: 36pt;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      line-height: 1.1;
+      color: var(--color-text);
+      margin-bottom: 3px;
+    }
+
+    .masthead__tagline {
+      font-family: var(--font-body);
+      font-size: 9pt;
+      font-style: italic;
+      color: var(--color-section);
+      letter-spacing: 0.4px;
+      margin-bottom: 4px;
+    }
+
+    .masthead__dateline {
+      font-family: var(--font-body);
+      font-size: 9pt;
+      color: var(--color-section);
+    }
+
+    .masthead__edition {
+      font-family: var(--font-body);
+      font-size: 8pt;
+      color: var(--color-section);
+      margin-top: 2px;
+    }
+
+    .masthead__personalised {
+      font-family: var(--font-body);
+      font-size: 8pt;
+      font-style: italic;
+      font-weight: 600;
+      color: var(--color-accent);
+      margin-top: 2px;
+    }
+
+    /* Double rule below masthead */
+    .masthead-rule {
+      border: none;
+      border-top: 2px solid var(--color-text);
+      border-bottom: 1px solid var(--color-text);
+      height: 5px;
+      margin: 0 0 16px 0;
+    }
+
+    /* ====================================================================
+       LEAD STORY
+       ==================================================================== */
+    .lead-story {
+      padding: 14px 0 16px;
+      border-bottom: 2px solid var(--color-rule-dark);
+      margin-bottom: 16px;
+    }
+
+    .lead-story__category {
+      font-family: var(--font-body);
+      font-size: 8pt;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--color-accent);
+      margin-bottom: 8px;
+    }
+
+    .lead-story__headline {
+      font-family: var(--font-display);
+      font-size: 26pt;
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--color-text);
+      margin-bottom: 12px;
+    }
+
+    .lead-story__body {
+      column-count: 2;
+      column-gap: 24px;
+      column-rule: 1px solid var(--color-rule);
+      text-align: justify;
+      hyphens: auto;
+    }
+
+    .lead-story__body p {
+      margin-bottom: 0.7em;
+      orphans: 2;
+      widows: 2;
+    }
+
+    .lead-story__body p:first-child::first-letter {
+      font-family: var(--font-display);
+      font-size: 3em;
+      float: left;
+      line-height: 0.8;
+      padding-right: 6px;
+      padding-top: 3px;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+
+    .lead-story__source {
+      margin-top: 10px;
+      font-family: var(--font-body);
+      font-size: 8pt;
+      color: var(--color-section);
+      font-style: italic;
+    }
+
+    /* ====================================================================
+       SECTIONS (multi-column flow for PDF)
+       ==================================================================== */
+    .pdf-section {
+      margin-bottom: 16px;
+      break-before: auto;
+      break-inside: auto;
+    }
+
+    .pdf-section:last-of-type {
+      margin-bottom: 0;
+    }
+
+    /* Section Header */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      margin-top: 4px;
+    }
+
+    .section-header::before,
+    .section-header::after {
+      content: '';
+      flex: 1;
+      border-top: 1px solid var(--color-rule);
+    }
+
+    .section-header__title {
+      font-family: var(--font-body);
+      font-size: 9pt;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      color: var(--color-section);
+      white-space: nowrap;
+    }
+
+    /* Section body: multi-column */
+    .section-stories {
+      column-count: 3;
+      column-gap: 22px;
+      column-rule: 1px solid var(--color-rule);
+    }
+
+    .section-stories--two-col {
+      column-count: 2;
+    }
+
+    /* ====================================================================
+       STORY CARDS
+       ==================================================================== */
+    .story {
+      break-inside: avoid;
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--color-rule);
+    }
+
+    .story:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+
+    .story__headline {
+      font-family: var(--font-display);
+      font-size: 14pt;
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--color-text);
+      margin-bottom: 8px;
+    }
+
+    .story__summary {
+      text-align: justify;
+      hyphens: auto;
+    }
+
+    .story__summary p {
+      margin-bottom: 0.6em;
+    }
+
+    .story__summary p:last-child {
+      margin-bottom: 0;
+    }
+
+    .story__source {
+      margin-top: 8px;
+      font-family: var(--font-body);
+      font-size: 8pt;
+      color: var(--color-section);
+      font-style: italic;
+    }
+
+    /* ====================================================================
+       EXPLAINER BOX
+       ==================================================================== */
+    .explainer-box {
+      background-color: var(--color-explainer);
+      border: 1px solid var(--color-rule);
+      border-top: 3px solid var(--color-section);
+      padding: 14px 16px;
+      margin-top: 4px;
+      break-inside: avoid;
+    }
+
+    .explainer-box .section-header {
+      margin-top: 0;
+    }
+
+    .explainer-box .section-header::before,
+    .explainer-box .section-header::after {
+      border-top-color: var(--color-rule-dark);
+    }
+
+    .explainer-label {
+      font-family: var(--font-body);
+      font-size: 7pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--color-accent);
+      margin-bottom: 2px;
+    }
+
+    .explainer-box .story__headline {
+      font-size: 13pt;
+    }
+
+    .explainer-box .story {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+
+    /* Explainer section uses 2 columns */
+    .explainer-stories {
+      column-count: 2;
+      column-gap: 22px;
+      column-rule: 1px solid var(--color-rule);
+    }
+
+    /* ====================================================================
+       FOOTER
+       ==================================================================== */
+    .newspaper-footer {
+      margin-top: 16px;
+      padding-top: 10px;
+      border-top: 3px solid var(--color-text);
+      text-align: center;
+      break-inside: avoid;
+    }
+
+    .newspaper-footer::before {
+      content: '';
+      display: block;
+      border-top: 1px solid var(--color-rule);
+      margin-bottom: 10px;
+      margin-top: 3px;
+    }
+
+    .footer__edition {
+      font-family: var(--font-body);
+      font-size: 8pt;
+      color: var(--color-section);
+      margin-bottom: 3px;
+    }
+
+    .footer__disclaimer {
+      font-family: var(--font-body);
+      font-size: 8pt;
+      color: var(--color-section);
+      font-style: italic;
+    }
+
+    .footer__date {
+      font-family: var(--font-body);
+      font-size: 8pt;
+      color: var(--color-rule-dark);
+      margin-top: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================================================================== -->
+  <!-- MASTHEAD                                                            -->
+  <!-- ================================================================== -->
+  <header class="masthead">
+    <div class="masthead__name">{{ newspaper_name }}</div>
+    <div class="masthead__tagline">{{ tagline }}</div>
+    <div class="masthead__dateline">{{ date }}</div>
+    <div class="masthead__edition">Edition No.&thinsp;{{ edition_number }}</div>
+    <div class="masthead__personalised">Personalised for Rishabh Srinivasan</div>
+  </header>
+  <hr class="masthead-rule">
+
+  <!-- ================================================================== -->
+  <!-- LEAD STORY                                                          -->
+  <!-- ================================================================== -->
+  <article class="lead-story">
+    <div class="lead-story__category">{{ lead_story.category | upper }}</div>
+    <h1 class="lead-story__headline">{{ lead_story.headline }}</h1>
+    <div class="lead-story__body">
+      {{ lead_story.summary }}
+      {{ lead_story.deep_dive }}
+    </div>
+    <div class="lead-story__source">
+      Source: <a href="{{ lead_story.source_url }}">{{ lead_story.source_name }}</a>
+    </div>
+  </article>
+
+  <!-- ================================================================== -->
+  <!-- MARKETS                                                             -->
+  <!-- ================================================================== -->
+  {% if sections.markets %}
+  <section class="pdf-section">
+    <div class="section-header">
+      <span class="section-header__title">Markets</span>
+    </div>
+    <div class="section-stories{% if sections.markets | length < 2 %} section-stories--two-col{% endif %}">
+      {% for story in sections.markets %}
+      <article class="story">
+        <h2 class="story__headline">{{ story.headline }}</h2>
+        <div class="story__summary">
+          {{ story.summary }}
+        </div>
+        <div class="story__source">
+          Source: <a href="{{ story.source_url }}">{{ story.source_name }}</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ================================================================== -->
+  <!-- ECONOMY                                                             -->
+  <!-- ================================================================== -->
+  {% if sections.economy %}
+  <section class="pdf-section">
+    <div class="section-header">
+      <span class="section-header__title">Economy</span>
+    </div>
+    <div class="section-stories{% if sections.economy | length < 2 %} section-stories--two-col{% endif %}">
+      {% for story in sections.economy %}
+      <article class="story">
+        <h2 class="story__headline">{{ story.headline }}</h2>
+        <div class="story__summary">
+          {{ story.summary }}
+        </div>
+        <div class="story__source">
+          Source: <a href="{{ story.source_url }}">{{ story.source_name }}</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ================================================================== -->
+  <!-- COMPANIES                                                           -->
+  <!-- ================================================================== -->
+  {% if sections.companies %}
+  <section class="pdf-section">
+    <div class="section-header">
+      <span class="section-header__title">Companies</span>
+    </div>
+    <div class="section-stories{% if sections.companies | length < 2 %} section-stories--two-col{% endif %}">
+      {% for story in sections.companies %}
+      <article class="story">
+        <h2 class="story__headline">{{ story.headline }}</h2>
+        <div class="story__summary">
+          {{ story.summary }}
+        </div>
+        <div class="story__source">
+          Source: <a href="{{ story.source_url }}">{{ story.source_name }}</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ================================================================== -->
+  <!-- EXPLAINER OF THE DAY                                                -->
+  <!-- ================================================================== -->
+  {% if sections.explainer %}
+  <section class="pdf-section">
+    <div class="explainer-box">
+      <div class="explainer-label">Feature</div>
+      <div class="section-header">
+        <span class="section-header__title">Explainer of the Day</span>
+      </div>
+      <div class="explainer-stories">
+        {% for story in sections.explainer %}
+        <article class="story">
+          <h2 class="story__headline">{{ story.headline }}</h2>
+          <div class="story__summary">
+            {{ story.summary }}
+          </div>
+          <div class="story__source">
+            Source: <a href="{{ story.source_url }}">{{ story.source_name }}</a>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ================================================================== -->
+  <!-- FOOTER                                                              -->
+  <!-- ================================================================== -->
+  <footer class="newspaper-footer">
+    <div class="footer__edition">{{ newspaper_name }} &middot; Edition No.&thinsp;{{ edition_number }}</div>
+    <div class="footer__disclaimer">{{ disclaimer }}</div>
+    <div class="footer__date">{{ date }}</div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+name: Daily Finance Newspaper
+
+on:
+  schedule:
+    # 11:00 UTC = 7:00 AM EDT / 6:00 AM EST
+    - cron: '0 11 * * *'
+  workflow_dispatch: {}  # Manual trigger for testing
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpango1.0-dev libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate today's newspaper
+        run: python src/pipeline.py
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+          HTML_BASE_URL: ${{ secrets.HTML_BASE_URL }}
+
+      - name: Copy CSS to output for GitHub Pages
+        run: |
+          cp templates/styles.css output/latest/styles.css 2>/dev/null || true
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./output/latest
+          keep_files: false
+          commit_message: "📰 Daily Finance Brief — $(date +'%Y-%m-%d')"
+
+      - name: Archive output as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: newspaper-${{ github.run_id }}
+          path: output/
+          retention-days: 30
